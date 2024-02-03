@@ -81,6 +81,29 @@ pub(super) fn optimize_functions(
                 AExpr::Literal(LiteralValue::Boolean(b)) => {
                     Some(AExpr::Literal(LiteralValue::Boolean(!b)))
                 },
+                // taki
+                AExpr::BinaryExpr { left, op, right }
+                    if matches!(
+                        op,
+                        Operator::GtEq | Operator::Gt | Operator::LtEq | Operator::Lt
+                    ) =>
+                {
+                    let new_op = match op {
+                        Operator::Lt => Operator::GtEq,
+                        Operator::LtEq => Operator::Gt,
+                        Operator::Gt => Operator::LtEq,
+                        Operator::GtEq => Operator::Lt,
+                        // should not happen
+                        _ => {
+                            unreachable!()
+                        },
+                    };
+                    Some(AExpr::BinaryExpr {
+                        left: *left,
+                        op: new_op,
+                        right: *right,
+                    })
+                },
                 _ => None,
             }
         },
